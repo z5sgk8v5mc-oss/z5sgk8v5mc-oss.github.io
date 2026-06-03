@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "claude_md=\"/Users/junya/Desktop/AI-X claude/claude.md\"; if [ -f \"$claude_md\" ]; then content=$(cat \"$claude_md\"); echo \"{\\\"hookSpecificOutput\\\": {\\\"hookEventName\\\": \\\"PreToolUse\\\", \\\"additionalContext\\\": \\\"## claude.md の内容\\\\n$content\\\"}}\"; fi",
+            "statusMessage": "claude.md を参照中..."
+          }
+        ]
+      }
+    ]
+  }
+}

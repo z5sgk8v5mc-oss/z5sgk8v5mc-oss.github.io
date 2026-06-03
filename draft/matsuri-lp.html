@@ -1,0 +1,555 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>知られざる日本の奇祭図鑑</title>
+  <style>
+    :root {
+      --red: #c0392b; --dark-red: #922b21; --gold: #d4a017;
+      --dark: #1a1a1a; --darker: #111; --card-bg: #1e1e1e;
+      --text: #f0e6d3; --muted: #9e8c78; --border: #3a3020;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { background: var(--darker); color: var(--text); font-family: 'Hiragino Mincho ProN','Yu Mincho',serif; line-height: 1.8; }
+
+    /* ── HERO ── */
+    .hero { position:relative; text-align:center; padding:80px 20px 60px; background:linear-gradient(180deg,#0a0000 0%,#1a0505 60%,var(--darker) 100%); overflow:hidden; }
+    .hero::before { content:'🔥'; position:absolute; font-size:400px; opacity:.04; top:-80px; left:50%; transform:translateX(-50%); pointer-events:none; }
+    .hero-kamon { font-size:52px; margin-bottom:16px; animation:float 4s ease-in-out infinite; }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    .hero h1 { font-size:clamp(1.8rem,5vw,3.2rem); letter-spacing:.15em; color:var(--gold); text-shadow:0 0 40px rgba(212,160,23,.4); margin-bottom:12px; }
+    .hero-sub { font-size:.98rem; color:var(--muted); letter-spacing:.06em; max-width:560px; margin:0 auto 28px; }
+    .hero-badges { display:flex; justify-content:center; gap:10px; flex-wrap:wrap; }
+    .badge { background:rgba(192,57,43,.15); border:1px solid rgba(192,57,43,.4); color:#e8a09a; padding:5px 14px; border-radius:20px; font-size:.82rem; }
+
+    /* ── STATS ── */
+    .stats { display:flex; justify-content:center; border-top:1px solid var(--border); border-bottom:1px solid var(--border); background:#150f00; }
+    .stat-item { flex:1; max-width:180px; text-align:center; padding:20px 12px; border-right:1px solid var(--border); }
+    .stat-item:last-child { border-right:none; }
+    .stat-num { font-size:1.8rem; color:var(--gold); display:block; line-height:1; margin-bottom:4px; }
+    .stat-label { font-size:.72rem; color:var(--muted); letter-spacing:.06em; }
+
+    /* ── TABS ── */
+    .tabs { display:flex; background:var(--dark); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:50; }
+    .tab-btn { flex:1; padding:16px; background:none; border:none; color:var(--muted); font-family:inherit; font-size:.95rem; letter-spacing:.06em; cursor:pointer; border-bottom:3px solid transparent; transition:all .2s; }
+    .tab-btn.active { color:var(--gold); border-bottom-color:var(--gold); background:rgba(212,160,23,.05); }
+    .tab-btn:hover:not(.active) { color:var(--text); background:rgba(255,255,255,.03); }
+    .tab-panel { display:none; }
+    .tab-panel.active { display:block; }
+
+    /* ── FILTER ── */
+    .filter-bar { display:flex; justify-content:center; gap:8px; flex-wrap:wrap; padding:24px 20px; background:var(--dark); }
+    .filter-btn { background:transparent; border:1px solid var(--border); color:var(--muted); padding:7px 18px; border-radius:24px; cursor:pointer; font-family:inherit; font-size:.88rem; letter-spacing:.04em; transition:all .2s; }
+    .filter-btn:hover, .filter-btn.active { background:var(--red); border-color:var(--red); color:#fff; }
+
+    /* ── GRID ── */
+    .section-title { text-align:center; padding:10px 20px 0; font-size:.78rem; letter-spacing:.12em; color:var(--muted); }
+    .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:1px; background:var(--border); margin:16px 0; }
+    .card { background:var(--card-bg); padding:28px 24px; cursor:pointer; transition:background .2s; display:flex; flex-direction:column; gap:10px; position:relative; }
+    .card:hover { background:#262626; }
+    .card-top-row { display:flex; justify-content:space-between; align-items:flex-start; }
+    .card-season { font-size:.75rem; color:var(--muted); letter-spacing:.06em; }
+    .fav-btn { background:none; border:none; cursor:pointer; font-size:1.3rem; line-height:1; padding:2px; transition:transform .15s; }
+    .fav-btn:hover { transform:scale(1.2); }
+    .fav-btn.active { filter:drop-shadow(0 0 4px #e74c3c); }
+    .card-icon { font-size:2rem; }
+    .card-pref { font-size:.76rem; color:var(--red); letter-spacing:.08em; }
+    .card h2 { font-size:1.3rem; color:var(--gold); letter-spacing:.05em; line-height:1.4; }
+    .card-tags { display:flex; gap:5px; flex-wrap:wrap; }
+    .tag { font-size:.7rem; border:1px solid var(--border); color:var(--muted); padding:2px 9px; border-radius:12px; }
+    .card-desc { font-size:.88rem; color:#c8b89a; line-height:1.9; }
+    .card-unique { font-size:.83rem; color:#e8a09a; background:rgba(192,57,43,.08); border-left:3px solid var(--red); padding:9px 13px; border-radius:0 6px 6px 0; line-height:1.8; }
+    .card-meta { display:flex; justify-content:space-between; align-items:center; border-top:1px solid var(--border); padding-top:10px; font-size:.76rem; color:var(--muted); flex-wrap:wrap; gap:4px; }
+    .card-designation { background:rgba(212,160,23,.1); border:1px solid rgba(212,160,23,.3); color:#d4a017; padding:2px 9px; border-radius:10px; font-size:.7rem; }
+    .card-official-badge { font-size:.7rem; background:rgba(212,160,23,.12); border:1px solid rgba(212,160,23,.3); color:var(--gold); padding:2px 8px; border-radius:10px; }
+
+    /* ── MAP ── */
+    .map-container { padding:24px 20px; }
+    .map-wrapper { position:relative; max-width:700px; margin:0 auto; }
+    .map-wrapper svg { width:100%; height:auto; display:block; }
+    .map-pin { cursor:pointer; transition:transform .15s; transform-origin:center; }
+    .map-pin:hover .pin-circle { r:11; }
+    .map-tooltip { position:absolute; background:#1e1a14; border:1px solid var(--border); border-radius:8px; padding:12px 16px; pointer-events:none; opacity:0; transition:opacity .15s; min-width:180px; z-index:10; }
+    .map-tooltip.show { opacity:1; }
+    .map-tooltip h4 { color:var(--gold); font-size:.95rem; margin-bottom:4px; }
+    .map-tooltip p { color:var(--muted); font-size:.78rem; }
+    .map-legend { display:flex; gap:16px; flex-wrap:wrap; justify-content:center; margin-top:16px; }
+    .map-legend-item { display:flex; align-items:center; gap:6px; font-size:.78rem; color:var(--muted); }
+    .legend-dot { width:12px; height:12px; border-radius:50%; }
+
+    /* ── MYPAGE ── */
+    .mypage { padding:32px 20px; max-width:900px; margin:0 auto; }
+    .mypage-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:24px; flex-wrap:wrap; gap:12px; }
+    .mypage-header h2 { font-size:1.4rem; color:var(--gold); letter-spacing:.1em; }
+    .mypage-count { font-size:.85rem; color:var(--muted); }
+    .mypage-empty { text-align:center; padding:80px 20px; color:var(--muted); }
+    .mypage-empty .empty-icon { font-size:4rem; margin-bottom:16px; }
+    .mypage-empty p { font-size:.95rem; line-height:2; }
+    .mypage-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(280px,1fr)); gap:16px; }
+    .mypage-card { background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:20px; display:flex; flex-direction:column; gap:8px; cursor:pointer; transition:border-color .2s; }
+    .mypage-card:hover { border-color:var(--gold); }
+    .mypage-card-top { display:flex; justify-content:space-between; align-items:center; }
+    .mypage-card h3 { font-size:1.1rem; color:var(--gold); letter-spacing:.04em; }
+    .mypage-card .card-pref { font-size:.75rem; }
+    .mypage-card .card-desc { font-size:.83rem; }
+    .clear-btn { background:rgba(192,57,43,.15); border:1px solid rgba(192,57,43,.35); color:#e8a09a; padding:7px 16px; border-radius:6px; cursor:pointer; font-family:inherit; font-size:.82rem; }
+    .clear-btn:hover { background:rgba(192,57,43,.3); }
+    .season-section { margin-bottom:28px; }
+    .season-section h3 { font-size:.85rem; letter-spacing:.1em; color:var(--muted); border-bottom:1px solid var(--border); padding-bottom:8px; margin-bottom:16px; }
+
+    /* ── MODAL ── */
+    .modal-overlay { display:none; position:fixed; inset:0; background:rgba(0,0,0,.85); z-index:100; align-items:center; justify-content:center; padding:20px; }
+    .modal-overlay.open { display:flex; }
+    .modal { background:#1e1a14; border:1px solid var(--border); border-radius:12px; max-width:640px; width:100%; max-height:90vh; overflow-y:auto; padding:36px 32px; position:relative; }
+    .modal-close { position:absolute; top:14px; right:18px; background:none; border:none; color:var(--muted); font-size:1.5rem; cursor:pointer; }
+    .modal-fav { position:absolute; top:14px; right:50px; background:none; border:none; font-size:1.5rem; cursor:pointer; transition:transform .15s; }
+    .modal-fav:hover { transform:scale(1.2); }
+    .modal h2 { color:var(--gold); font-size:1.7rem; margin-bottom:6px; }
+    .modal-pref { color:var(--red); font-size:.88rem; margin-bottom:16px; }
+    .modal-info-row { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:14px; }
+    .modal-info-item { background:var(--card-bg); border:1px solid var(--border); border-radius:8px; padding:9px 14px; font-size:.8rem; }
+    .modal-info-item span { color:var(--muted); display:block; font-size:.7rem; margin-bottom:2px; }
+    .modal-body p { margin-bottom:14px; color:#c8b89a; font-size:.93rem; line-height:2; }
+    .unique-box { background:rgba(192,57,43,.1); border:1px solid rgba(192,57,43,.3); border-radius:8px; padding:14px 18px; color:#e8a09a; margin-bottom:14px; font-size:.88rem; line-height:1.9; }
+    .unique-box::before { content:'★ なぜ珍しい？'; display:block; font-size:.72rem; color:var(--red); letter-spacing:.08em; margin-bottom:6px; }
+    .official-link { display:inline-flex; align-items:center; gap:8px; margin-top:14px; background:rgba(212,160,23,.1); border:1px solid rgba(212,160,23,.35); color:var(--gold); padding:9px 18px; border-radius:8px; text-decoration:none; font-size:.86rem; letter-spacing:.04em; transition:background .2s; }
+    .official-link:hover { background:rgba(212,160,23,.22); }
+
+    @media(max-width:600px){
+      .stats{flex-wrap:wrap} .stat-item{min-width:100px}
+      .grid,.mypage-grid{grid-template-columns:1fr}
+      .modal{padding:24px 18px}
+      .tabs .tab-btn{font-size:.8rem;padding:14px 8px}
+    }
+  </style>
+</head>
+<body>
+
+<section class="hero">
+  <div class="hero-kamon">⛩</div>
+  <h1>知られざる日本の奇祭図鑑</h1>
+  <p class="hero-sub">テレビでは見られない、ガイドブックには載らない。<br>日本の片隅で、今も静かに息づく奇妙で愛おしい祭りたち。</p>
+  <div class="hero-badges">
+    <span class="badge">🪔 全国12祭り収録</span>
+    <span class="badge">🏛 国指定文化財あり</span>
+    <span class="badge">🌍 ユネスコ登録あり</span>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat-item"><span class="stat-num">12</span><span class="stat-label">収録祭り数</span></div>
+  <div class="stat-item"><span class="stat-num">11</span><span class="stat-label">都道府県</span></div>
+  <div class="stat-item"><span class="stat-num">500+</span><span class="stat-label">年の歴史（最長）</span></div>
+  <div class="stat-item"><span class="stat-num" id="favCount">0</span><span class="stat-label">お気に入り</span></div>
+</div>
+
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('list',this)">📋 祭り一覧</button>
+  <button class="tab-btn" onclick="switchTab('map',this)">🗾 地図で見る</button>
+  <button class="tab-btn" onclick="switchTab('mypage',this)">❤️ マイページ</button>
+</div>
+
+<!-- TAB: LIST -->
+<div class="tab-panel active" id="tab-list">
+  <div class="filter-bar">
+    <button class="filter-btn active" onclick="filter('all',this)">すべて</button>
+    <button class="filter-btn" onclick="filter('春',this)">🌸 春</button>
+    <button class="filter-btn" onclick="filter('夏',this)">☀️ 夏</button>
+    <button class="filter-btn" onclick="filter('秋',this)">🍂 秋</button>
+    <button class="filter-btn" onclick="filter('冬',this)">❄️ 冬</button>
+    <button class="filter-btn" onclick="filter('泥・砂',this)">💧 泥・砂系</button>
+    <button class="filter-btn" onclick="filter('火',this)">🔥 火系</button>
+    <button class="filter-btn" onclick="filter('謎',this)">❓ 謎系</button>
+  </div>
+  <p class="section-title">▼ カードをクリックすると詳細 / ♡ でお気に入り登録</p>
+  <div class="grid" id="grid"></div>
+</div>
+
+<!-- TAB: MAP -->
+<div class="tab-panel" id="tab-map">
+  <div class="map-container">
+    <p style="text-align:center;color:var(--muted);font-size:.85rem;margin-bottom:20px;letter-spacing:.06em">📍 ピンをクリック・ホバーで祭り情報を表示</p>
+    <div class="map-wrapper">
+      <svg viewBox="0 0 600 680" xmlns="http://www.w3.org/2000/svg" id="japanMap">
+        <rect width="600" height="680" fill="#0a1628" rx="4"/>
+        <!-- 北海道 -->
+        <path d="M390,60 L430,48 L480,52 L530,58 L555,72 L548,95 L520,108 L500,118 L470,122 L445,115 L415,105 L395,88 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1.2"/>
+        <!-- 青森 -->
+        <path d="M445,125 L475,120 L490,128 L488,145 L468,150 L448,142 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 岩手・秋田 -->
+        <path d="M448,142 L488,145 L492,165 L480,180 L460,185 L442,175 L440,158 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 宮城・山形 -->
+        <path d="M442,175 L480,180 L482,200 L465,210 L445,205 L438,192 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 福島 -->
+        <path d="M438,192 L465,210 L468,228 L448,235 L428,228 L425,210 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 栃木・茨城 -->
+        <path d="M425,210 L448,235 L452,252 L428,260 L408,255 L405,238 L410,222 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 群馬・埼玉・千葉・東京 -->
+        <path d="M405,238 L428,260 L432,275 L415,280 L395,278 L385,265 L390,248 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 神奈川・静岡 -->
+        <path d="M385,265 L415,280 L418,298 L400,308 L378,305 L370,290 L375,275 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 新潟 -->
+        <path d="M378,192 L405,195 L408,218 L390,225 L368,218 L362,202 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 長野・山梨 -->
+        <path d="M362,228 L390,225 L395,248 L375,258 L355,250 L350,238 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 愛知・岐阜 -->
+        <path d="M342,285 L370,280 L378,305 L360,318 L338,312 L332,298 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 三重・奈良 -->
+        <path d="M318,315 L342,310 L348,335 L330,345 L308,338 L305,322 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 大阪・京都・兵庫 -->
+        <path d="M290,318 L318,315 L322,338 L302,348 L278,342 L272,328 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 和歌山 -->
+        <path d="M305,338 L330,345 L328,365 L308,372 L288,362 L285,348 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 島根・鳥取 -->
+        <path d="M238,298 L268,292 L278,312 L255,320 L232,312 L228,302 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 広島・岡山 -->
+        <path d="M238,315 L268,310 L272,332 L250,340 L228,332 L225,320 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 山口 -->
+        <path d="M205,328 L232,322 L235,342 L215,350 L198,342 L195,332 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 四国 -->
+        <path d="M248,345 L292,338 L298,365 L275,378 L248,372 L238,358 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 福岡・佐賀 -->
+        <path d="M185,368 L215,362 L218,382 L198,390 L178,382 L175,372 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 長崎 -->
+        <path d="M158,378 L182,372 L185,395 L165,402 L148,394 L145,382 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 熊本 -->
+        <path d="M188,388 L215,382 L218,405 L198,412 L178,405 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 大分 -->
+        <path d="M215,368 L242,362 L245,385 L222,392 L200,385 L198,372 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 宮崎・鹿児島 -->
+        <path d="M200,408 L228,402 L232,428 L210,438 L188,428 L185,415 Z" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <!-- 沖縄 -->
+        <ellipse cx="240" cy="548" rx="42" ry="14" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <ellipse cx="198" cy="542" rx="18" ry="9" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <ellipse cx="170" cy="535" rx="14" ry="7" fill="#2a3a2a" stroke="#3a5a3a" stroke-width="1"/>
+        <g id="pins"></g>
+      </svg>
+      <div class="map-tooltip" id="mapTooltip">
+        <h4 id="ttName"></h4>
+        <p id="ttPref"></p>
+        <p id="ttTiming" style="color:var(--gold);font-size:.75rem;margin-top:4px"></p>
+      </div>
+    </div>
+    <div class="map-legend">
+      <div class="map-legend-item"><div class="legend-dot" style="background:#e8a09a"></div>冬</div>
+      <div class="map-legend-item"><div class="legend-dot" style="background:#7ec8e3"></div>夏</div>
+      <div class="map-legend-item"><div class="legend-dot" style="background:#d4a017"></div>秋</div>
+      <div class="map-legend-item"><div class="legend-dot" style="background:#8bc34a"></div>春</div>
+      <div class="map-legend-item">❤️ お気に入り登録済み</div>
+    </div>
+  </div>
+</div>
+
+<!-- TAB: MYPAGE -->
+<div class="tab-panel" id="tab-mypage">
+  <div class="mypage">
+    <div class="mypage-header">
+      <h2>❤️ お気に入りの祭り</h2>
+      <div style="display:flex;align-items:center;gap:12px">
+        <span class="mypage-count" id="mypageCount"></span>
+        <button class="clear-btn" onclick="clearFavs()">🗑 すべて削除</button>
+      </div>
+    </div>
+    <div id="mypageContent"></div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="handleModalClick(event)">
+  <div class="modal" id="modalContent">
+    <button class="modal-fav" id="modalFavBtn" onclick="toggleFavFromModal()">🤍</button>
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div id="modalBody"></div>
+  </div>
+</div>
+
+<script>
+// ─── DATA ───
+const festivals = [
+  { id:1, icon:'😤', name:'悪態まつり', pref:'茨城県 笠間市',
+    season:'冬', month:12, timing:'12月 第3日曜日',
+    tags:['悪口OK','江戸時代から','奇祭'],
+    desc:'白装束の天狗13人が16ヶ所の祠を巡る中、参拝者が互いに罵声を浴びせ合い、お供え物を奪い合う祭り。江戸時代から続く伝統で、奪ったお供え物には無病息災・五穀豊穣のご利益がある。',
+    unique:'神事の場で悪口が公認・奨励されるという、常識を逆転させた祭り。日本三大奇祭の一つとも言われる。',
+    designation:'市指定外', categories:['謎'],
+    url:'https://www.city.kasama.lg.jp/page/page000154.html', urlLabel:'笠間市公式ホームページ',
+    mapX:437, mapY:245 },
+  { id:2, icon:'😄', name:'笑い祭（丹生祭）', pref:'和歌山県 日高川町',
+    season:'秋', month:10, timing:'10月 体育の日直前の日曜日',
+    tags:['神様が寝坊','笑い命','県指定'],
+    desc:'神無月に出雲の神様会議に寝坊した丹生都姫命を慰めたのが起源。笑の文字を顔に描いた鈴振りが笑え笑えと練り歩く。参加者全員が笑顔を求められる。',
+    unique:'神様が寝坊したという微笑ましいエピソードが起源。笑うこと自体が祭りの主眼という類を見ない発想。',
+    designation:'和歌山県指定無形民俗芸能', categories:['謎'],
+    url:'https://hidakagawa-kanko.jp/miru/nyuujinnja/', urlLabel:'日高川町観光協会公式サイト',
+    mapX:300, mapY:352 },
+  { id:3, icon:'🌊', name:'平方のどろいんきょ', pref:'埼玉県 上尾市',
+    season:'夏', month:7, timing:'7月 中旬の日曜日',
+    tags:['泥まみれ','神輿を転がす','県指定'],
+    desc:'水を撒いてぬかるませた庭に白木の神輿を投げ込み、担ぎ手ごと泥まみれにして転がす。さらに神輿を荒川に投げ入れる川入りも実施。泥を浴びると家内安全・無病息災のご利益がある。',
+    unique:'神聖なはずの神輿を意図的に泥まみれにして転がすという全国でも非常に珍しい形式。',
+    designation:'埼玉県指定無形民俗文化財', categories:['泥・砂'],
+    url:'https://www.city.ageo.lg.jp/page/013116071301.html', urlLabel:'上尾市公式ホームページ',
+    mapX:412, mapY:265 },
+  { id:4, icon:'🌧', name:'砂かけ祭（御田植祭）', pref:'奈良県 河合町',
+    season:'冬', month:2, timing:'2月11日（建国記念の日）',
+    tags:['砂＝雨','1300年の歴史','県指定'],
+    desc:'1300年以上の歴史を持つ御田植祭。農作業の所作を演じた後、砂を雨に見立てて参加者と田人が激しくかけ合う。砂をかければかけるほど豊作になると信じられ、全員砂まみれになる。',
+    unique:'砂を雨に見立てて投げ合うという呪術的発想がユニーク。冬の神社で全員が砂まみれになる非日常体験。',
+    designation:'奈良県指定文化財', categories:['泥・砂'],
+    url:'http://www.hirosetaisya.com/sunakake.htm', urlLabel:'廣瀬大社公式サイト',
+    mapX:316, mapY:332 },
+  { id:5, icon:'🐄', name:'おんだ祭', pref:'奈良県 明日香村',
+    season:'冬', month:2, timing:'2月 第1日曜日',
+    tags:['子宝祈願','西日本三大奇祭','県指定'],
+    desc:'天狗・翁・牛が竹筒で参拝者の尻を叩いて厄払い。農作業の所作を演じた後、天狗とお多福が夫婦和合の儀式を公開で演じ、終了後は福の紙が撒かれ子宝に恵まれると伝えられる。',
+    unique:'西日本三大奇祭の一つ。境内で夫婦和合の儀式を人前で演じるという大胆な内容と真剣な子宝祈願の組み合わせ。',
+    designation:'奈良県指定文化財', categories:['謎'],
+    url:'http://asukaniimasujinja.jp/event/', urlLabel:'飛鳥坐神社公式ホームページ',
+    mapX:322, mapY:340 },
+  { id:6, icon:'🔥', name:'陀々堂の鬼はしり', pref:'奈良県 五條市',
+    season:'冬', month:1, timing:'1月14日',
+    tags:['500年以上','鬼が幸運','国指定重要無形民俗'],
+    desc:'室町時代から500年以上続く修正会の結願行事。父鬼・母鬼・子鬼の3匹が約60kgの巨大たいまつを振りかざしながら本堂内を走り回る。火の粉を浴びると厄除け・五穀豊穣のご利益。',
+    unique:'鬼が幸福をもたらすという全国的にも珍しい位置づけ。60kgのたいまつを持った鬼が屋内を走り回る圧倒的な迫力。',
+    designation:'国指定重要無形民俗文化財', categories:['火'],
+    url:'https://www.city.gojo.lg.jp/soshiki/bunka/9/2201.html', urlLabel:'五條市公式ホームページ',
+    mapX:310, mapY:348 },
+  { id:7, icon:'❓', name:'ケベス祭', pref:'大分県 国東市',
+    season:'秋', month:10, timing:'10月14日',
+    tags:['起源完全不明','謎の存在','火祭り'],
+    desc:'謎の面を付けたケベスが燃え盛るシダの山を守る白装束のトウバと攻防を繰り広げる火祭り。ケベスが9度目の突入でシダの山をかき回し、トウバが参拝者を追い回す。',
+    unique:'起源もケベスの語源も由来も完全に不明。登場する存在が何者か誰も知らないまま何百年も続いている。',
+    designation:'国選択無形民俗文化財', categories:['謎','火'],
+    url:'https://www.city.kunisaki.oita.jp/soshiki/bunkazai/shinaiminzokugyojikebesu.html', urlLabel:'国東市公式ホームページ',
+    mapX:228, mapY:390 },
+  { id:8, icon:'🎋', name:'ヘトマト', pref:'長崎県 五島市',
+    season:'冬', month:1, timing:'1月 第3日曜日',
+    tags:['語源不明','国指定重要無形民俗','離島'],
+    desc:'新婚女性2人が酒樽に乗り羽根突き、ススを塗った若者が藁玉を奪い合う玉せせり、豊作大漁を占う綱引き、長さ3mの大草履の奉納と続く。語源・由来とも地元でも不明。',
+    unique:'語源・由来ともに地元でも不明な謎の行事。脈絡のように見える行事が組み合わさった唯一無二の構成。',
+    designation:'国指定重要無形民俗文化財', categories:['謎'],
+    url:'https://www.city.goto.nagasaki.jp/s014/010/040/050/070/20200129104833.html', urlLabel:'五島市公式ホームページ',
+    mapX:162, mapY:388 },
+  { id:9, icon:'👶', name:'生子神社の泣き相撲', pref:'栃木県 鹿沼市',
+    season:'秋', month:9, timing:'9月19日以降 最初の日曜日',
+    tags:['泣かせた方が勝ち','健やかな成長','国選択'],
+    desc:'力士に扮した氏子が生後6ヶ月から3歳の乳幼児2人を抱き、ヨイショの掛け声で先に泣かせた方が勝ちとなる相撲。泣く子は育つという俗語に基づき子どもの健やかな成長を祈願する。',
+    unique:'普通の相撲と真逆で泣かせた方が勝ちという発想の転換が秀逸。大人が本気で赤ちゃんを泣かせようとするギャップが見物。',
+    designation:'国選択無形民俗文化財', categories:['謎'],
+    url:'https://www.city.kanuma.tochigi.jp/0299/info-0000001969-1.html', urlLabel:'鹿沼市公式ホームページ',
+    mapX:428, mapY:238 },
+  { id:10, icon:'🐚', name:'北海へそ祭り', pref:'北海道 富良野市',
+    season:'夏', month:7, timing:'7月28・29日（固定）',
+    tags:['北海道のへそ','お腹に顔','年7万人来場'],
+    desc:'富良野が北海道のほぼ中央（へそ）に位置することから1969年に創始。お腹に顔の絵を描いた約4000人の踊り手が街を練り歩くへそ踊りがメイン。踊るたびにお腹の絵が表情を変え笑いを誘う。',
+    unique:'地理的特徴、北海道のへそにかけたユーモアが祭りの根幹。お腹に顔を描いて踊るシュールな発想が50年以上続く一大イベントに。',
+    designation:'なし', categories:['謎'],
+    url:'https://hesomatsuri.com/', urlLabel:'北海へそ祭り公式サイト',
+    mapX:468, mapY:108 },
+  { id:11, icon:'👹', name:'こっぱげ面', pref:'福岡県 八女市',
+    season:'夏', month:7, timing:'7月 中旬',
+    tags:['叩かれると幸せ','山里の奇祭','害虫退散'],
+    desc:'鬼の面（こっぱげ面）を付けた若者が青竹を振りかざしながら村内を暴れ回り、子どもたちの尻を叩いて回る。叩かれた人は1年間無病息災で過ごせると伝えられており、子どもは逃げながらも叩かれることを望む。',
+    unique:'鬼に尻を叩かれることが幸せのしるしという逆転の発想。山里に子どもの悲鳴と歓声がこだまする光景は他に類を見ない。',
+    designation:'地域の民俗行事', categories:['謎'],
+    url:'https://www.city.yame.fukuoka.jp/soshiki/11/soumu/2/1454653572622.html', urlLabel:'八女市公式ホームページ',
+    mapX:196, mapY:382 },
+  { id:12, icon:'🌑', name:'パーントゥ・プナハ', pref:'沖縄県 宮古島市',
+    season:'秋', month:10, timing:'旧暦9月（10月前後）',
+    tags:['ユネスコ無形文化遺産','泥まみれ','観光客も容赦なし'],
+    desc:'全身に泥と蔦を纏った神霊パーントゥが3体出現し、集落内の人・家・車あらゆるものに泥を塗りつける厄払い。子どもや観光客も関係なく泥を塗られる。塗られることで厄が祓われ新生活が守護される。',
+    unique:'見物客にも容赦なく泥を塗りつけるという、観客が否応なく巻き込まれる奇祭。ユネスコ無形文化遺産にも登録されている。',
+    designation:'ユネスコ無形文化遺産 / 国指定重要無形民俗文化財', categories:['泥・砂'],
+    url:'https://www.city.miyakojima.lg.jp/soshiki/kyouiku/syougaigakusyu/syougaikakusyu/bunkazai-PantuShimajiri.html', urlLabel:'宮古島市公式ホームページ',
+    mapX:240, mapY:548 },
+];
+
+// ─── STATE ───
+const seasonColor = { 春:'#8bc34a', 夏:'#7ec8e3', 秋:'#d4a017', 冬:'#e8a09a' };
+let currentModalId = null;
+
+// ─── FAVORITES ───
+function getFavs() { return JSON.parse(localStorage.getItem('matsuri-favs') || '[]'); }
+function saveFavs(a) { localStorage.setItem('matsuri-favs', JSON.stringify(a)); }
+function isFav(id) { return getFavs().includes(id); }
+function toggleFav(id) {
+  let favs = getFavs();
+  if(favs.includes(id)) favs = favs.filter(x=>x!==id);
+  else favs.push(id);
+  saveFavs(favs);
+  updateFavUI();
+}
+function updateFavUI() {
+  const favs = getFavs();
+  document.getElementById('favCount').textContent = favs.length;
+  document.querySelectorAll('.fav-btn').forEach(btn => {
+    const id = parseInt(btn.dataset.id);
+    btn.textContent = isFav(id) ? '❤️' : '🤍';
+    btn.classList.toggle('active', isFav(id));
+  });
+  if(currentModalId) {
+    const btn = document.getElementById('modalFavBtn');
+    btn.textContent = isFav(currentModalId) ? '❤️' : '🤍';
+  }
+  renderMypage();
+  renderPins();
+}
+function toggleFavFromModal() { if(currentModalId) toggleFav(currentModalId); }
+function clearFavs() {
+  if(confirm('お気に入りをすべて削除しますか？')) { saveFavs([]); updateFavUI(); }
+}
+
+// ─── CARDS ───
+function renderCards(list) {
+  document.getElementById('grid').innerHTML = list.map(f => `
+    <div class="card" onclick="openModal(${f.id})">
+      <div class="card-top-row">
+        <span class="card-season">${seasonColor[f.season] ? '●' : ''} ${f.season} / ${f.month}月</span>
+        <button class="fav-btn ${isFav(f.id)?'active':''}" data-id="${f.id}"
+          onclick="event.stopPropagation();toggleFav(${f.id})"
+          title="お気に入りに追加">${isFav(f.id)?'❤️':'🤍'}</button>
+      </div>
+      <div class="card-icon">${f.icon}</div>
+      <div class="card-pref">📍 ${f.pref}</div>
+      <h2>${f.name}</h2>
+      <div class="card-tags">${f.tags.map(t=>'<span class="tag">'+t+'</span>').join('')}</div>
+      <p class="card-desc">${f.desc.slice(0,85)}…</p>
+      <div class="card-unique">${f.unique.slice(0,65)}…</div>
+      <div class="card-meta">
+        <span>${f.timing}</span>
+        <span style="display:flex;gap:4px;flex-wrap:wrap">
+          ${f.designation!=='なし'&&f.designation!=='地域の民俗行事'&&f.designation!=='市指定外'
+            ? '<span class="card-designation">'+f.designation.slice(0,10)+'…</span>' : ''}
+          ${f.url ? '<span class="card-official-badge">🔗 公式あり</span>' : ''}
+        </span>
+      </div>
+    </div>`).join('');
+}
+
+function filter(cat, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  const list = cat==='all' ? festivals : festivals.filter(f=>f.season===cat||f.categories.includes(cat));
+  renderCards(list);
+}
+
+// ─── MAP PINS ───
+function renderPins() {
+  const g = document.getElementById('pins');
+  if(!g) return;
+  g.innerHTML = festivals.map(f => {
+    const col = seasonColor[f.season];
+    const faved = isFav(f.id);
+    return '<g class="map-pin" data-id="'+f.id+'"'
+      +' onmouseenter="showTooltip(event,'+f.id+')"'
+      +' onmouseleave="hideTooltip()"'
+      +' onclick="openModal('+f.id+')">'
+      +(faved ? '<circle cx="'+f.mapX+'" cy="'+f.mapY+'" r="14" fill="'+col+'" opacity="0.25"/>' : '')
+      +'<circle class="pin-circle" cx="'+f.mapX+'" cy="'+f.mapY+'" r="8" fill="'+col+'" stroke="#1a1a1a" stroke-width="1.5"/>'
+      +'<circle cx="'+f.mapX+'" cy="'+f.mapY+'" r="3" fill="#1a1a1a"/>'
+      +(faved ? '<text x="'+(f.mapX+10)+'" y="'+(f.mapY-8)+'" font-size="10" fill="#e74c3c">❤</text>' : '')
+      +'</g>';
+  }).join('');
+}
+
+function showTooltip(e, id) {
+  const f = festivals.find(x=>x.id===id);
+  const tt = document.getElementById('mapTooltip');
+  document.getElementById('ttName').textContent = f.icon+' '+f.name;
+  document.getElementById('ttPref').textContent = '📍 '+f.pref;
+  document.getElementById('ttTiming').textContent = '🗓 '+f.timing;
+  const svgRect = document.getElementById('japanMap').getBoundingClientRect();
+  const wRect = document.querySelector('.map-wrapper').getBoundingClientRect();
+  const scaleX = svgRect.width / 600;
+  const scaleY = svgRect.height / 680;
+  let tx = (f.mapX * scaleX) + (svgRect.left - wRect.left) + 14;
+  let ty = (f.mapY * scaleY) + (svgRect.top - wRect.top) - 20;
+  if(tx + 200 > wRect.width) tx -= 210;
+  tt.style.left = tx+'px';
+  tt.style.top = ty+'px';
+  tt.classList.add('show');
+}
+function hideTooltip() { document.getElementById('mapTooltip').classList.remove('show'); }
+
+// ─── MYPAGE ───
+function renderMypage() {
+  const favs = getFavs();
+  const el = document.getElementById('mypageContent');
+  document.getElementById('mypageCount').textContent = favs.length+'件 登録中';
+  if(!favs.length) {
+    el.innerHTML = '<div class="mypage-empty"><div class="empty-icon">🤍</div><p>お気に入りはまだありません。<br>祭りのカードの ♡ をタップして登録しましょう！</p></div>';
+    return;
+  }
+  const favFestivals = festivals.filter(f=>favs.includes(f.id));
+  let html = '';
+  ['春','夏','秋','冬'].forEach(s => {
+    const group = favFestivals.filter(f=>f.season===s);
+    if(!group.length) return;
+    const em = s==='春'?'🌸':s==='夏'?'☀️':s==='秋'?'🍂':'❄️';
+    html += '<div class="season-section"><h3>'+em+' '+s+'のお祭り</h3><div class="mypage-grid">'
+      + group.map(f =>
+        '<div class="mypage-card" onclick="openModal('+f.id+')">'
+        +'<div class="mypage-card-top"><span style="font-size:1.6rem">'+f.icon+'</span>'
+        +'<button class="fav-btn active" data-id="'+f.id+'" onclick="event.stopPropagation();toggleFav('+f.id+')">❤️</button></div>'
+        +'<h3>'+f.name+'</h3>'
+        +'<div class="card-pref">📍 '+f.pref+'</div>'
+        +'<p class="card-desc">'+f.desc.slice(0,70)+'…</p>'
+        +'<div class="card-tags">'+f.tags.map(t=>'<span class="tag">'+t+'</span>').join('')+'</div>'
+        +'</div>').join('')
+      +'</div></div>';
+  });
+  el.innerHTML = html;
+}
+
+// ─── MODAL ───
+function openModal(id) {
+  const f = festivals.find(x=>x.id===id);
+  currentModalId = id;
+  document.getElementById('modalFavBtn').textContent = isFav(id)?'❤️':'🤍';
+  const tagsHtml = f.tags.map(t=>'<span class="tag">'+t+'</span>').join('');
+  const officialHtml = f.url
+    ? '<a class="official-link" href="'+f.url+'" target="_blank" rel="noopener noreferrer">🔗 '+f.urlLabel+' ↗</a>'
+    : '';
+  document.getElementById('modalBody').innerHTML =
+    '<p style="font-size:.78rem;color:var(--muted);letter-spacing:.08em;margin-bottom:4px">'+f.season+' の祭り</p>'
+    +'<h2>'+f.icon+' '+f.name+'</h2>'
+    +'<p class="modal-pref">📍 '+f.pref+'</p>'
+    +'<div class="modal-info-row">'
+    +'<div class="modal-info-item"><span>開催時期</span>'+f.timing+'</div>'
+    +'<div class="modal-info-item"><span>文化財指定</span>'+f.designation+'</div>'
+    +'</div>'
+    +'<div class="modal-body">'
+    +'<p>'+f.desc+'</p>'
+    +'<div class="unique-box">'+f.unique+'</div>'
+    +'<div class="card-tags">'+tagsHtml+'</div>'
+    +officialHtml
+    +'</div>';
+  document.getElementById('modal').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+function closeModal() {
+  document.getElementById('modal').classList.remove('open');
+  document.body.style.overflow = '';
+  currentModalId = null;
+}
+function handleModalClick(e) {
+  if(e.target === document.getElementById('modal')) closeModal();
+}
+
+// ─── TABS ───
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-'+name).classList.add('active');
+  if(name === 'mypage') renderMypage();
+}
+
+// ─── INIT ───
+renderCards(festivals);
+renderPins();
+updateFavUI();
+</script>
+</body>
+</html>

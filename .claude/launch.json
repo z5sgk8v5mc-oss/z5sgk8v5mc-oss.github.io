@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "matsuri-lp",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["serve", "/Users/junya/Desktop/AI-X claude/draft", "-p", "8765", "--no-clipboard"],
+      "port": 8765
+    }
+  ]
+}
